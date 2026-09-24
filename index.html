@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Kenangan Kita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        creamBg: '#F5EBDD',
+                        burgundy: '#800020',
+                        offWhite: '#FFF9F2',
+                        roseRed: '#D45060',
+                        darkText: '#3A2E31',
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F5EBDD;
+            color: #3A2E31;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Hero Slideshow Transition Classes */
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transform: scale(1);
+            transition: opacity 1000ms cubic-bezier(0.4, 0, 0.2, 1), transform 1000ms cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: opacity, transform;
+            z-index: 1;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+            transform: scale(1.06);
+            z-index: 2;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.6) rotate(0deg);
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.7;
+            }
+            85% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 40;
+            animation: floatUp 8s linear infinite;
+        }
+
+        /* Masonry Grid Layout */
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 1.5rem;
+        }
+        @media(min-width: 640px) {
+            .masonry-grid { column-count: 2; }
+        }
+        @media(min-width: 1024px) {
+            .masonry-grid { column-count: 3; }
+        }
+        @media(min-width: 1280px) {
+            .masonry-grid { column-count: 4; }
+        }
+
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5EBDD;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D45060;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #800020;
+        }
+    </style>
+</head>
+<body class="bg-creamBg text-darkText antialiased selection:bg-roseRed/20 selection:text-burgundy">
+
+    <div id="floating-particles-container"></div>
+
+    <!-- ======================== -->
+    <!-- 1. FULLSCREEN HERO BANNER -->
+    <!-- ======================== -->
+    <section class="relative w-screen h-screen overflow-hidden flex flex-col items-center justify-center text-center">
+        <!-- Hero Slideshow Background Container -->
+        <div id="hero-slideshow" class="absolute inset-0 w-full h-full"></div>
+
+        <!-- Burgundy Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#800020]/80 via-[#800020]/40 to-[#800020]/20 z-10 pointer-events-none"></div>
+
+        <!-- Hero Content -->
+        <div class="relative z-20 px-6 max-w-4xl mx-auto flex flex-col items-center justify-center h-full pt-8">
+            <span class="text-offWhite/90 font-serif italic text-lg sm:text-xl tracking-wider mb-3 drop-shadow">
+                Selamat Datang di Website Kita
+            </span>
+
+            <p class="text-offWhite/90 text-sm sm:text-base md:text-lg max-w-md font-light mb-10 tracking-wide drop-shadow">
+                Tempat kecil untuk menyimpan cerita dan kenangan kita.
+            </p>
+
+            <a href="#gallery" class="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#800020] hover:bg-[#800020]/90 text-offWhite font-medium text-sm sm:text-base shadow-xl hover:scale-105 transition-all duration-300 border border-roseRed/30 group">
+                <span>Lihat Galeri</span>
+                <span class="transform group-hover:translate-y-1 transition-transform">↓</span>
+            </a>
+        </div>
+
+        <!-- Slideshow Indicators -->
+        <div class="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center gap-2">
+            <div id="hero-indicators" class="flex items-center gap-2 bg-[#800020]/40 backdrop-blur-md px-4 py-2 rounded-full border border-offWhite/10"></div>
+        </div>
+    </section>
+
+    <!-- ======================== -->
+    <!-- 2. PHOTO GALLERY SECTION -->
+    <!-- ======================== -->
+    <main id="gallery" class="py-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+        <!-- Section Header -->
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-roseRed font-semibold text-xs sm:text-sm tracking-widest uppercase mb-2 block font-serif">Koleksi Abadi</span>
+            <h2 class="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-burgundy mb-4">Our Memories</h2>
+            <p class="text-darkText/80 text-base sm:text-lg font-serif italic">Potongan kecil dari cerita yang kita simpan bersama.</p>
+            <div class="w-16 h-0.5 bg-roseRed mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        <!-- Masonry Photo Grid & Quote Cards -->
+        <div id="photo-grid" class="masonry-grid"></div>
+    </main>
+
+    <!-- ======================== -->
+    <!-- 3. PHOTO POPUP / LIGHTBOX -->
+    <!-- ======================== -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-[#800020]/[0.95] backdrop-blur-md hidden flex items-center justify-center transition-all duration-300 opacity-0">
+        <!-- Close Button -->
+        <button id="lightbox-close" class="absolute top-6 right-6 z-50 text-offWhite hover:text-roseRed bg-offWhite/10 hover:bg-offWhite/20 px-4 py-2.5 rounded-full backdrop-blur-md transition-all flex items-center gap-2 text-xs sm:text-sm font-medium tracking-wider border border-offWhite/20">
+            <span>× CLOSE</span>
+        </button>
+
+        <!-- Previous Button -->
+        <button id="lightbox-prev" class="absolute left-4 sm:left-8 z-50 text-offWhite bg-offWhite/10 hover:bg-roseRed p-3 sm:p-4 rounded-full backdrop-blur-md transition-all transform hover:scale-110 shadow-lg border border-offWhite/20">
+            <span class="text-lg sm:text-xl font-bold">←</span>
+        </button>
+
+        <!-- Next Button -->
+        <button id="lightbox-next" class="absolute right-4 sm:right-8 z-50 text-offWhite bg-offWhite/10 hover:bg-roseRed p-3 sm:p-4 rounded-full backdrop-blur-md transition-all transform hover:scale-110 shadow-lg border border-offWhite/20">
+            <span class="text-lg sm:text-xl font-bold">→</span>
+        </button>
+
+        <!-- Lightbox Content Container -->
+        <div class="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center justify-center p-2">
+            <img id="lightbox-img" src="" alt="Memory Fullscreen" class="max-w-[90vw] max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-offWhite/20 transition-transform duration-300">
+            <div id="lightbox-caption" class="mt-4 text-offWhite text-sm sm:text-base font-serif italic tracking-wide bg-offWhite/10 px-6 py-2 rounded-full backdrop-blur-md border border-offWhite/20"></div>
+        </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- 4. FINAL SECTION -->
+    <!-- ======================== -->
+    <footer class="bg-burgundy text-offWhite py-20 px-4 text-center relative overflow-hidden border-t border-roseRed/20">
+        <div class="max-w-xl mx-auto relative z-10 flex flex-col items-center gap-4">
+            <p class="font-serif italic text-lg sm:text-xl text-offWhite/90 max-w-md">“Semoga cerita kita selalu punya halaman baru.”</p>
+            <div class="w-12 h-0.5 bg-roseRed/60 my-2"></div>
+            <p class="text-xs sm:text-sm tracking-widest text-offWhite/70 font-sans uppercase">Made with ♡ for us.</p>
+        </div>
+    </footer>
+
+    <!-- ======================== -->
+    <!-- 5. JAVASCRIPT SYSTEM -->
+    <!-- ======================== -->
+    <script>
+        // Hero slideshow background images
+        const heroPhotos = [
+            {
+                url: "bg1.jpeg",
+                caption: "Selamat Datang di Website Kita"
+            },
+            {
+                url: "bg2.jpeg",
+                caption: "Selamat Datang di Website Kita"
+            }
+        ];
+
+        // Gallery photos array (1.jpg to 9.jpg)
+        const photos = [
+            {
+                url: "1.jpg",
+                caption: "Perjalanan indah yang kita lewati bersama ♡"
+            },
+            {
+                url: "2.jpg",
+                caption: "Gelak tawa dan secangkir kopi hangat"
+            },
+            {
+                url: "3.jpg",
+                caption: "Senyumanmu adalah tempat kepulanganku"
+            },
+            {
+                url: "4.jpg",
+                caption: "Bergandengan tangan dalam setiap langkah"
+            },
+            {
+                url: "5.jpg",
+                caption: "Ketenangan dalam dekapan hangatmu"
+            },
+            {
+                url: "6.jpg",
+                caption: "Merajut babak baru di setiap musim"
+            },
+            {
+                url: "7.jpg",
+                caption: "Senja bersamamu adalah yang terbaik"
+            },
+            {
+                url: "8.jpg",
+                caption: "Hari-hari penuh keajaiban kecil"
+            },
+            {
+                url: "9.jpg",
+                caption: "Selamanya di dalam cerita kita"
+            }
+        ];
+
+        let currentSlideIndex = 0;
+        let currentLightboxIndex = 0;
+        let slideshowInterval = null;
+
+        function preloadImages() {
+            heroPhotos.forEach(photo => {
+                const img = new Image();
+                img.src = photo.url;
+            });
+            photos.forEach(photo => {
+                const img = new Image();
+                img.src = photo.url;
+            });
+        }
+
+        function initHeroSlideshow() {
+            const container = document.getElementById('hero-slideshow');
+            const indicatorsContainer = document.getElementById('hero-indicators');
+            
+            container.innerHTML = '';
+            indicatorsContainer.innerHTML = '';
+
+            heroPhotos.forEach((photo, index) => {
+                const slide = document.createElement('div');
+                slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
+                slide.style.backgroundImage = `url('${photo.url}')`;
+                container.appendChild(slide);
+
+                const dot = document.createElement('button');
+                dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-roseRed w-6' : 'bg-offWhite/50 hover:bg-offWhite'}`;
+                dot.setAttribute('aria-label', `Slide ${index + 1}`);
+                dot.addEventListener('click', () => {
+                    goToSlide(index);
+                    resetSlideshowTimer();
+                });
+                indicatorsContainer.appendChild(dot);
+            });
+        }
+
+        function updateHeroSlideshow() {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('#hero-indicators button');
+
+            slides.forEach((slide, index) => {
+                if (index === currentSlideIndex) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            dots.forEach((dot, index) => {
+                if (index === currentSlideIndex) {
+                    dot.className = 'w-6 h-2.5 rounded-full bg-roseRed transition-all duration-300 shadow-md';
+                } else {
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-offWhite/50 hover:bg-offWhite transition-all duration-300';
+                }
+            });
+        }
+
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % heroPhotos.length;
+            updateHeroSlideshow();
+        }
+
+        function goToSlide(index) {
+            currentSlideIndex = index;
+            updateHeroSlideshow();
+        }
+
+        function startSlideshow() {
+            slideshowInterval = setInterval(() => {
+                nextSlide();
+            }, 2000);
+        }
+
+        function resetSlideshowTimer() {
+            clearInterval(slideshowInterval);
+            startSlideshow();
+        }
+
+        function initGallery() {
+            const grid = document.getElementById('photo-grid');
+            grid.innerHTML = '';
+
+            const quotes = [
+                {
+                    text: "“Some memories are worth keeping forever.”",
+                    sub: "Our Story"
+                },
+                {
+                    text: "“Bukan tentang seberapa banyak foto yang kita punya, tapi tentang cerita di balik setiap fotonya.”",
+                    sub: "Memories"
+                }
+            ];
+
+            let quoteIndex = 0;
+
+            photos.forEach((photo, index) => {
+                const item = document.createElement('div');
+                item.className = 'masonry-item group cursor-pointer';
+                item.innerHTML = `
+                    <div class="relative overflow-hidden rounded-[18px] shadow-md bg-offWhite transition-all duration-300 group-hover:shadow-xl border border-roseRed/20">
+                        <img src="${photo.url}" alt="Memory ${index + 1}" loading="lazy" class="w-full h-auto object-cover transform transition-transform duration-500 group-hover:scale-105" onerror="this.src='https://placehold.co/600x800/F5EBDD/800020?text=Memory'">
+                        <div class="absolute inset-0 bg-[#800020]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6 text-center">
+                            <div class="transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 text-offWhite flex flex-col items-center gap-2">
+                                <span class="text-roseRed text-xl">♥</span>
+                                <span class="font-serif text-lg font-medium tracking-wide">View Memory</span>
+                                <span class="text-xs text-offWhite/80 italic font-serif">${photo.caption}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                item.addEventListener('click', () => openLightbox(index));
+                grid.appendChild(item);
+
+                if (index === 2 || index === 5) {
+                    if (quotes[quoteIndex]) {
+                        const quoteCard = document.createElement('div');
+                        quoteCard.className = 'masonry-item';
+                        quoteCard.innerHTML = `
+                            <div class="bg-burgundy rounded-[18px] p-8 shadow-md border border-roseRed/30 text-offWhite flex flex-col items-center text-center justify-center min-h-[220px] relative overflow-hidden">
+                                <div class="absolute -right-4 -bottom-4 text-roseRed/20 font-serif text-7xl select-none">♥</div>
+                                <span class="text-roseRed text-2xl mb-3">♥</span>
+                                <p class="font-serif italic text-xl sm:text-2xl mb-4 leading-relaxed">${quotes[quoteIndex].text}</p>
+                                <span class="text-xs font-sans tracking-widest uppercase text-offWhite/70">${quotes[quoteIndex].sub}</span>
+                            </div>
+                        `;
+                        grid.appendChild(quoteCard);
+                        quoteIndex++;
+                    }
+                }
+            });
+        }
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            updateLightboxContent();
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+
+        function updateLightboxContent() {
+            const photo = photos[currentLightboxIndex];
+            lightboxImg.src = photo.url;
+            lightboxCaption.textContent = photo.caption;
+        }
+
+        function lightboxNextSlide() {
+            currentLightboxIndex = (currentLightboxIndex + 1) % photos.length;
+            updateLightboxContent();
+        }
+
+        function lightboxPrevSlide() {
+            currentLightboxIndex = (currentLightboxIndex - 1 + photos.length) % photos.length;
+            updateLightboxContent();
+        }
+
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxNext.addEventListener('click', lightboxNextSlide);
+        lightboxPrev.addEventListener('click', lightboxPrevSlide);
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('hidden')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') lightboxNextSlide();
+            if (e.key === 'ArrowLeft') lightboxPrevSlide();
+        });
+
+        function createFloatingParticles() {
+            const container = document.getElementById('floating-particles-container');
+            const symbols = ['♥', '♡', '✦'];
+
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'floating-heart text-roseRed/40 font-serif';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (7 + Math.random() * 6) + 's';
+                particle.style.fontSize = (12 + Math.random() * 14) + 'px';
+                particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                container.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 13000);
+            }, 1500);
+        }
+
+        window.onload = function() {
+            preloadImages();
+            initHeroSlideshow();
+            startSlideshow();
+            initGallery();
+            createFloatingParticles();
+        };
+    </script>
+</body>
+</html>
